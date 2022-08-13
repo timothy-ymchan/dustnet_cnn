@@ -1,0 +1,82 @@
+<comment>
+problem   = turbulent clustering of particles
+reference = 
+configure = --prob=turb_par -p -fft
+
+<job>
+problem_id = TurbPar    # problem ID: basename of output filenames
+
+<output1>
+file_type  = hst        # History data dump
+dt         = 0.01       # time increment between outputs
+
+<output2>
+file_type  = hdf5        # Binary data dump
+variable   = prim       # variables to be output
+dt         = 1.0        # time increment between outputs
+
+<output3>
+file_type  = rst        # Binary data dump hdf5 for mpi
+dt         = 8.0       # time increment between outputs
+
+<output4>
+file_type  = tab        # Binary data dump
+variable   = np       # variables to be output
+dt         = 1.0        # time increment between outputs
+data_format = %5.1e
+
+<time>
+cfl_number  = 0.3        # The Courant, Friedrichs, & Lewy (CFL) Number
+# nlim      = 100000     # cycle limit
+tlim        = 24.0        # time limit
+integrator  = vl2       # time integration algorithm
+xorder      = 3         # order of spatial reconstruction
+ncycle_out  = 100         # interval for stdout summary info
+
+<mesh>
+nx1        = 256         # Number of zones in X1-direction
+x1min      = -0.5       # minimum value of X1
+x1max      = 0.5        # maximum value of X1
+ix1_bc     = periodic   # inner-X1 boundary flag
+ox1_bc     = periodic   # outer-X1 boundary flag
+
+nx2        = 256         # Number of zones in X2-direction
+x2min      = -0.5       # minimum value of X2
+x2max      = 0.5        # maximum value of X2
+ix2_bc     = periodic   # inner-X2 boundary flag
+ox2_bc     = periodic   # outer-X2 boundary flag
+
+nx3        = 256         # Number of zones in X3-direction
+x3min      = -0.5       # minimum value of X3
+x3max      = 0.5        # maximum value of X3
+ix3_bc     = periodic   # inner-X3 boundary flag
+ox3_bc     = periodic   # outer-X3 boundary flag
+
+refinement = none
+
+<meshblock>
+nx1        = 32
+nx2        = 32
+nx3        = 128
+
+<hydro>
+gamma           = 1.44    # gamma = C_p/C_v
+iso_sound_speed = 1.00     # equavalent to sqrt(gamma*p/d) for p=0.1, d=1
+
+<particles>
+nppc = 1              # number of particles per cell on average
+taus0 = 0.1           # drag stopping time
+backreaction = false  # turn on/off the back reaction of the gas drag
+
+<problem>
+turb_flag  = 2    # 1 for decaying, 2 (impulsive) or 3 (continuous) for driven turbulence
+dedt       = 0.005  # Energy injection rate (for driven) or Total energy (for decaying)
+nlow       = 3    # cut-off wavenumber at low-k
+nhigh      = 8   # cut-off wavenumber at high-k
+expo       = 1.83333  # power-law exponent
+tcorr      = 0.002  # correlation time for OU process (both impulsive and continuous)
+dtdrive    = 0.001  # time interval between perturbation (impulsive)
+f_shear    = 1.0  # the ratio of the shear component
+
+nu_iso     = 1.0e-5
+dtog       = 0.1
