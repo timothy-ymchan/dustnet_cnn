@@ -1,5 +1,5 @@
 # Particle clustering in turbulence: Prediction of spatial and statistical properties with deep learning
-This is the code repository for: 
+This is the code repository for: https://arxiv.org/abs/2210.02339
 
 ## File Layout
 `model`  : Machine learning model
