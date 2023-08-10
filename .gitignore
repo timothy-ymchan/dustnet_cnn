@@ -1,2 +1,4 @@
 *.npy
 *.athdf
+*checkpoint.*
+*.pyc
