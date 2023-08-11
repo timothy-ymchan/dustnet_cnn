@@ -7,8 +7,10 @@ import glob
 import athena_read
 import h5py
 import matplotlib.pyplot as plt
+import argparse
 
-def main(memshare):
+def main(args):
+
     """normal = read_athdf('../athenaMLdata/data/*103*')
     rs = np.geomspace(1/128,1,10)
     nproc=5
@@ -22,15 +24,26 @@ def main(memshare):
         print(f'Processing time: {et-st} sec')
         if i % 5 == 0:
             print('Iteration: ',i+1,'r=',r)"""
-    
-    normal = read_athdf('../athenaMLdata/data/*103*')
-    nproc=5
-    r = 0.031250000000000014
-    st = time.time()
-    s3_val = S3longitudinal_Sampling_Multiproc(data=normal[0],r=r,nsamples=1000000,nproc=nproc,memshare=memshare) # 1000000 samples run
-    write_line('./s3long-out/s3-normal-sampling-1000000-50-pts.txt',f"{r},{s3_val}") 
-    et = time.time()
-    print(f'Processing time: {et-st} sec')
+    # Print configurations
+    print('Input file: ',args.in_path)
+    print('Output prefix: ',args.out_prefix)
+    print('Memory sharing: ',args.memshare)
+    print('r values: ',args.r_bins)
+    in_file = read_athdf(args.in_path)
+    r_bins = [eval(r) for r in args.r_bins.split(',')]
+    #rint(r_bins)
+    rs = np.geomspace(*r_bins)
+    filename = f'{args.out_prefix}-sampling-{args.nsamples}-{len(rs)}-pts.txt'
+
+    write_line(filename,f'# {args.in_path}\tsampling-{args.nsamples}\t{len(rs)} points')
+    for i, r in enumerate(rs):
+        print('Job ',i+1)
+        st = time.time()
+        s3_val = S3longitudinal_Sampling_Multiproc(data=in_file[0],r=r,nsamples=args.nsamples,nproc=args.nproc,memshare=args.memshare) # 1000000 samples run
+        write_line(filename,f"{r},{s3_val}") 
+        print('The estimated statistics at r=',r,' is S3=',s3_val)
+        et = time.time()
+        print(f'Processing time: {et-st} sec')
 
 
 
@@ -219,7 +232,7 @@ def S3longitudinal_Sampling_Multiproc(data,r,nsamples,nproc,memshare=False):
         Close_SharedMemory('vel2')
         Close_SharedMemory('vel3')
         Close_SharedMemory('where')
-        
+
     del map_args
 
     return sum([s3_stat*csize for s3_stat,csize in zip(s3_stats,chunks_size)])/nsamples
@@ -250,6 +263,15 @@ def clear_file(filename):
         f.write("")
 
 if __name__ == "__main__":
-    memshare = False
-    print('Memory sharing Enabled: ',memshare)
-    main(memshare)
+    # Handle all the arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--memshare',help='Use shared memory',default=False,type=bool)
+    parser.add_argument('--in-path',help='Input file glob',required=True,type=str)
+    parser.add_argument('--out-prefix',help='Output prefix',required=True,type=str)
+    parser.add_argument('--r-bins',help='Geometric bin arguments for r in format (r0,r1,N)',required=True,type=str)
+    parser.add_argument('--nproc',help='Number of processors',required=False,default=5,type=int)
+    parser.add_argument('--nsamples',help='Number of sample points',required=False,default=50000)
+
+    args = parser.parse_args()
+    
+    main(args)
