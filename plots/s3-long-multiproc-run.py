@@ -29,6 +29,7 @@ def main(args):
     print('Output prefix: ',args.out_prefix)
     print('Memory sharing: ',args.memshare)
     print('r values: ',args.r_bins)
+    print('nsamples: ',args.nsamples)
     in_file = read_athdf(args.in_path)
     r_bins = [eval(r) for r in args.r_bins.split(',')]
     #rint(r_bins)
@@ -37,13 +38,13 @@ def main(args):
 
     write_line(filename,f'# {args.in_path}\tsampling-{args.nsamples}\t{len(rs)} points')
     for i, r in enumerate(rs):
-        print('Job ',i+1)
+        print('Iteration ',i+1)
         st = time.time()
         s3_val = S3longitudinal_Sampling_Multiproc(data=in_file[0],r=r,nsamples=args.nsamples,nproc=args.nproc,memshare=args.memshare) # 1000000 samples run
         write_line(filename,f"{r},{s3_val}") 
         print('The estimated statistics at r=',r,' is S3=',s3_val)
         et = time.time()
-        print(f'Processing time: {et-st} sec')
+        print(f'Processing time: {et-st} sec\n')
 
 
 
@@ -270,7 +271,7 @@ if __name__ == "__main__":
     parser.add_argument('--out-prefix',help='Output prefix',required=True,type=str)
     parser.add_argument('--r-bins',help='Geometric bin arguments for r in format (r0,r1,N)',required=True,type=str)
     parser.add_argument('--nproc',help='Number of processors',required=False,default=5,type=int)
-    parser.add_argument('--nsamples',help='Number of sample points',required=False,default=50000)
+    parser.add_argument('--nsamples',help='Number of sample points',required=False,default=50000,type=int)
 
     args = parser.parse_args()
     
