@@ -2,3 +2,4 @@
 *.athdf
 *checkpoint.*
 *.pyc
+*.txt
